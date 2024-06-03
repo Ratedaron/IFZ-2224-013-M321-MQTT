@@ -10,71 +10,74 @@ public class DemoApplication {
 		String broker = "tcp://192.168.56.107:1883"; // MQTT Broker-Adresse
 		String clientId = "demo_client"; // Client-ID
 		String topic = "sensoren/sensor1"; // MQTT-Topic
-		int pubQos = 1;
-
+		int pubQos = 1; // Qualitätsstufe der veröffentlichten Nachrichten
+		
 		try {
-			// Start sender 1 after a delay
-
+			// Startet Sender 1 nach einer Verzögerung
 			Thread senderThread1 = new Thread(new SecondMqttSender());
 			senderThread1.start();
 			System.out.println("Sender 1 gestartet.");
 
-			// Wait for a few seconds
+			// Wartet für ein paar Sekunden
 			Thread.sleep(5000);
 
-			// Start sender 2 after another delay
+			// Startet Sender 2 nach einer weiteren Verzögerung
 			Thread senderThread2 = new Thread(new SenserNrThree());
 			senderThread2.start();
 			System.out.println("Sender 2 gestartet.");
 
-			// Wait for a few seconds
+			// Wartet für ein paar Sekunden
 			Thread.sleep(10000);
 
-			// Start sender 3 after another delay
+			// Startet Sender 3 nach einer weiteren Verzögerung
 			Thread senderThread3 = new Thread(new SenserNrThree());
 			senderThread3.start();
 			System.out.println("Sender 3 gestartet.");
 
-			// Wait for a few seconds
+			// Wartet für ein paar Sekunden
 			Thread.sleep(10000);
 
-			// Start sender 3 after another delay
+			// Startet Sender 4 nach einer weiteren Verzögerung
 			Thread VierterSensor = new Thread(new VierterSensor());
 			VierterSensor.start();
 			System.out.println("Sender 4 gestartet.");
 
+			// Wartet für ein paar Sekunden
 			Thread.sleep(5000);
-			// Connect to MQTT broker
+			
+			// Verbindung zum MQTT-Broker herstellen
 			MqttClient client = new MqttClient(broker, clientId, new MemoryPersistence());
 			MqttConnectOptions connOpts = new MqttConnectOptions();
 			connOpts.setCleanSession(true);
 
-			System.out.println("Connecting to broker: " + broker);
+			System.out.println("Verbindung zum Broker wird hergestellt: " + broker);
 			client.connect(connOpts);
-			System.out.println("Connected");
+			System.out.println("Verbunden");
 
-			double counter = 0.0;
+			double counter = 0.0; // Zählervariable für die Sinus-Berechnung
 
 			while (true) {
-				double sinValue = Math.sin(counter); // Sinus-Wert berechnen
-				System.out.println("Sinus-Wert: " + sinValue); // Sinus-Wert ausgeben
+				// Berechnet den Sinus-Wert
+				double sinValue = Math.sin(counter);
+				System.out.println("Sinus-Wert: " + sinValue); // Gibt den Sinus-Wert aus
 
-				// Nachricht erstellen
+				// Erstellt die Nachricht
 				MqttMessage message = new MqttMessage(Double.toString(sinValue).getBytes());
 				message.setQos(pubQos);
 
-				// Nachricht zum Topic senden
+				// Sendet die Nachricht an das Topic
 				client.publish(topic, message);
-				System.out.println("Published message: " + message);
+				System.out.println("Nachricht veröffentlicht: " + message);
 
-				// Zählervariable erhöhen
+				// Erhöht die Zählervariable
 				counter += 0.1;
 
-				// Wait for a short time before publishing the next message
+				// Wartet eine kurze Zeit vor der nächsten Veröffentlichung
 				Thread.sleep(1000);
 			}
 
 		} catch (MqttException | InterruptedException e) {
+			// Fehlerbehandlung
 			e.printStackTrace();
 		}
 	}
